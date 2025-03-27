@@ -1,49 +1,85 @@
-import React, { useState } from "react";
-import { loginStudent, getGitHubAuthURL } from "../utils/api";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { loginStudent, getGitHubAuthURL, githubCallback } from "../utils/api";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Login = () => {
+  const [credentials, setCredentials] = useState({ username: "", password: "" });
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ username: "", password: "" });
-  const [message, setMessage] = useState("");
+  const location = useLocation();
 
+  // Handle input change
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setCredentials({ ...credentials, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  // Handle login
+  const handleLogin = async (e) => {
     e.preventDefault();
-    const response = await loginStudent(formData);
+    const response = await loginStudent(credentials);
     if (response.status === "success") {
       localStorage.setItem("token", response.token);
-      setMessage("Login successful! Redirecting...");
-      setTimeout(() => navigate("/profile"), 2000);
+      navigate("/profile");
     } else {
-      setMessage(response.message || "Invalid credentials.");
+      setError(response.message);
     }
   };
 
+  // Handle GitHub OAuth Login
   const handleGitHubLogin = async () => {
-    const response = await getGitHubAuthURL();
-    if (response.github_auth_url) {
-      window.location.href = response.github_auth_url; // Redirect to GitHub OAuth
-    } else {
-      setMessage("GitHub authentication failed.");
+    try {
+      const response = await getGitHubAuthURL();
+      console.log("GitHub Auth URL:", response.github_auth_url); // Debugging
+  
+      if (response.github_auth_url) {
+        window.location.href = response.github_auth_url;  // Redirect to GitHub login page
+      } else {
+        setError("GitHub OAuth failed: No auth URL received");
+      }
+    } catch (error) {
+      console.error("GitHub login error:", error);
+      setError("GitHub OAuth request failed");
     }
   };
+  
+
+  // Handle GitHub OAuth Callback (Runs only when redirected back from GitHub)
+  const handleGitHubCallback = async () => {
+    const params = new URLSearchParams(location.search);
+    const code = params.get("code");
+    if (code) {
+      const response = await githubCallback(code);
+      if (response.status === "success") {
+        localStorage.setItem("token", response.token);
+        navigate("/profile");
+      } else {
+        setError(response.message);
+      }
+    }
+  };
+
+  // Run GitHub callback if the URL has a code
+  useState(() => {
+    handleGitHubCallback();
+  }, []);
 
   return (
-    <div className="container">
+    <div className="login-container">
       <h2>Login</h2>
-      {message && <p>{message}</p>}
-      <form onSubmit={handleSubmit}>
+      {error && <p className="error">{error}</p>}
+      
+      <form onSubmit={handleLogin}>
         <input type="text" name="username" placeholder="Username" onChange={handleChange} required />
         <input type="password" name="password" placeholder="Password" onChange={handleChange} required />
         <button type="submit">Login</button>
       </form>
+
+      <p>Or</p>
+
       <button onClick={handleGitHubLogin} className="github-btn">
         Login with GitHub
       </button>
+
       <p>Don't have an account? <a href="/register">Register here</a></p>
     </div>
   );

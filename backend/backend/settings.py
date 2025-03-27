@@ -11,9 +11,14 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+from pathlib import Path
+import environ
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 
 # Quick-start development settings - unsuitable for production
@@ -73,10 +78,19 @@ REST_FRAMEWORK = {
 
 CORS_ALLOW_ALL_ORIGINS = True 
 
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5174",
-    "http://127.0.0.1:5174",
-]
+# SOCIAL_AUTH_GITHUB_KEY = env("GITHUB_CLIENT_ID")
+# SOCIAL_AUTH_GITHUB_SECRET = env("GITHUB_CLIENT_SECRET")
+
+SOCIAL_AUTH_GITHUB_KEY = "Ov23liwiURUiyKsP0JL3"
+SOCIAL_AUTH_GITHUB_SECRET = "8c050e25e738ddea4d63bd14a48b6a63ecd2844b"
+
+SOCIAL_AUTH_GITHUB_SCOPE = ['user']
+
+SOCIAL_AUTH_GITHUB_REDIRECT_URI = "http://127.0.0.1:8000/api/students/github_callback/"
+
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+
 
 CORS_ALLOW_CREDENTIALS = True
 

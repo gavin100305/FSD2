@@ -78,48 +78,67 @@ class StudentViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['get'])
     def github_login(self, request):
-        """Initiate GitHub OAuth login"""
-        return Response({
-            'status': 'success',
-            'github_auth_url': '/login/github/'
-        }, status=status.HTTP_200_OK)
-
-    @action(detail=False, methods=['get'])
-    def github_callback(self, request):
-        """Handle GitHub OAuth callback"""
-        code = request.GET.get('code')
-        if not code:
-            return Response({
-                'status': 'error',
-                'message': 'No code provided'
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            strategy = load_strategy(request)
-            backend = load_backend(strategy=strategy, name='github', redirect_uri=None)
-
-            user = backend.complete(request=request)
-
-            if user and user.is_active:
-                login(request, user)
-                token, _ = Token.objects.get_or_create(user=user)  # Generate auth token
-                return Response({
-                    'status': 'success',
-                    'message': 'GitHub login successful',
-                    'token': token.key,
-                    'data': StudentSerializer(user).data
-                }, status=status.HTTP_200_OK)
-
-        except MissingBackend:
-            return Response({
-                'status': 'error',
-                'message': 'Authentication failed'
-            }, status=status.HTTP_401_UNAUTHORIZED)
-        except Exception as e:
-            return Response({
-                'status': 'error',
-                'message': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        """Return the GitHub authorization URL"""
+        client_id = "Ov23liwiURUiyKsP0JL3"
+        redirect_uri = "http://127.0.0.1:8000/api/students/github_callback/"
+        github_auth_url = f"https://github.com/login/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&scope=user"
+    
+        return Response({'github_auth_url': github_auth_url}, status=status.HTTP_200_OK)
 
 
-# Create your views here.
+    import requests
+
+@action(detail=False, methods=['get'])
+def github_callback(self, request):
+    """Handle GitHub OAuth callback"""
+    code = request.GET.get('code')
+    if not code:
+        return Response({'status': 'error', 'message': 'No code provided'}, 
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    client_id = SOCIAL_AUTH_GITHUB_KEY
+    client_secret = SOCIAL_AUTH_GITHUB_SECRET
+    token_url = "https://github.com/login/oauth/access_token"
+
+    # Exchange code for access token
+    data = {
+        'client_id': client_id,
+        'client_secret': client_secret,
+        'code': code
+    }
+    headers = {'Accept': 'application/json'}
+    response = requests.post(token_url, data=data, headers=headers)
+
+    if response.status_code != 200:
+        return Response({'status': 'error', 'message': 'Failed to get access token'}, 
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    token_data = response.json()
+    access_token = token_data.get('access_token')
+
+    if not access_token:
+        return Response({'status': 'error', 'message': 'Access token not received'}, 
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    # Fetch GitHub user details
+    user_url = "https://api.github.com/user"
+    user_response = requests.get(user_url, headers={'Authorization': f'token {access_token}'})
+    if user_response.status_code != 200:
+        return Response({'status': 'error', 'message': 'Failed to fetch GitHub user data'}, 
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    github_user = user_response.json()
+    github_username = github_user.get('login')
+
+    # Check if user exists
+    student, created = Student.objects.get_or_create(github_username=github_username)
+    if created:
+        student.email = github_user.get('email', '')
+        student.username = github_username
+        student.save()
+
+    login(request, student)
+    token, _ = Token.objects.get_or_create(user=student)
+
+    return Response({'status': 'success', 'token': token.key, 'data': StudentSerializer(student).data}, 
+                    status=status.HTTP_200_OK)
