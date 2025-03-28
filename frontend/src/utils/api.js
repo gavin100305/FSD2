@@ -57,10 +57,11 @@ export const getStudentProfile = async (token) => {
 // GitHub OAuth Login
 export const getGitHubAuthURL = async () => {
   try {
-    const response = await api.get("/students/github_login/");
-    return response.data;
+      const response = await fetch("http://127.0.0.1:8000/api/students/github_login/");
+      return await response.json();  // ✅ Convert response to JSON
   } catch (error) {
-    return error.response?.data || { status: "error", message: "GitHub OAuth failed" };
+      console.error("GitHub Auth URL fetch error:", error);
+      return { error: "Failed to fetch GitHub auth URL" };
   }
 };
 
