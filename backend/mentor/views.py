@@ -20,28 +20,40 @@ class MentorViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['post'])
     def register(self, request):
         """Register a new mentor"""
-        serializer = MentorSerializer(data=request.data)
-        if serializer.is_valid():
-            # Create mentor but don't save yet
-            mentor = Mentor(
-                username=serializer.validated_data['username'],
-                email=serializer.validated_data.get('email', ''),
-                phone_number=serializer.validated_data.get('phone_number', ''),
-                expertise=serializer.validated_data.get('expertise', '')
-            )
-            # Set password properly
-            mentor.set_password(request.data['password'])
-            mentor.save()
-            
+        try:
+            # Check if email already exists
+            email = request.data.get('email')
+            if email and Mentor.objects.filter(email=email).exists():
+                return Response({
+                    'status': 'error',
+                    'message': 'Email already exists'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            serializer = MentorSerializer(data=request.data)
+            if serializer.is_valid():
+                mentor = Mentor(
+                    username=serializer.validated_data['username'],
+                    email=serializer.validated_data.get('email', ''),
+                    phone_number=serializer.validated_data.get('phone_number', ''),
+                    expertise=serializer.validated_data.get('expertise', '')
+                )
+                mentor.set_password(request.data['password'])
+                mentor.save()
+                
+                return Response({
+                    'status': 'success',
+                    'message': 'Mentor registered successfully',
+                    'data': MentorSerializer(mentor).data
+                }, status=status.HTTP_201_CREATED)
             return Response({
-                'status': 'success',
-                'message': 'Mentor registered successfully',
-                'data': MentorSerializer(mentor).data
-            }, status=status.HTTP_201_CREATED)
-        return Response({
-            'status': 'error',
-            'message': serializer.errors
-        }, status=status.HTTP_400_BAD_REQUEST)
+                'status': 'error',
+                'message': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['post'])
     def login(self, request):
