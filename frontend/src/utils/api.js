@@ -74,3 +74,44 @@ export const githubCallback = async (code) => {
     return error.response?.data || { status: "error", message: "GitHub authentication failed" };
   }
 };
+
+// Mentor APIs
+export const registerMentor = async (mentorData) => {
+  try {
+    const response = await api.post("/mentors/register/", mentorData);
+    return response.data;
+  } catch (error) {
+    return error.response?.data || { status: "error", message: "Something went wrong" };
+  }
+};
+
+export const loginMentor = async (credentials) => {
+  try {
+    const response = await api.post("/mentors/login/", credentials);
+    return response.data;
+  } catch (error) {
+    return error.response?.data || { status: "error", message: "Invalid credentials" };
+  }
+};
+
+export const logoutMentor = async (token) => {
+  try {
+    const response = await api.post("/mentors/logout/", null, {
+      headers: { Authorization: `Token ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    return error.response?.data || { status: "error", message: "Logout failed" };
+  }
+};
+
+export const getMentorProfile = async (token) => {
+  try {
+    const response = await api.get("/mentors/profile/", {
+      headers: { Authorization: `Token ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    return error.response?.data || { status: "error", message: "Unauthorized" };
+  }
+};

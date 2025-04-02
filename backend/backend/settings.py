@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "corsheaders",  
     "social_django",  
     "students",  
+    "mentor",
 ]
 
 MIDDLEWARE = [
@@ -60,19 +61,16 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-AUTH_USER_MODEL = "students.Student"
+AUTH_USER_MODEL = "mentor.Mentor"
 
-AUTHENTICATION_BACKENDS = (
-    "social_core.backends.github.GithubOAuth2",
-    "django.contrib.auth.backends.ModelBackend",
-)
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.TokenAuthentication",
-    ],
-    "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.AllowAny",
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ],
 }
 
