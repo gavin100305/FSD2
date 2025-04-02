@@ -6,5 +6,5 @@ router = DefaultRouter()
 router.register(r'students', StudentViewSet, basename='student')
 
 urlpatterns = [
-    path("api/", include(router.urls)),
+    path('', include(router.urls)),
 ]

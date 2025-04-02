@@ -20,7 +20,7 @@ const Login = () => {
     const response = await loginStudent(credentials);
     if (response.status === "success") {
       localStorage.setItem("token", response.token);
-      navigate("/profile");
+      navigate("/dashboard");
     } else {
       setError(response.message);
     }

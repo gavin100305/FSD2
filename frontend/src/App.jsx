@@ -8,6 +8,7 @@ import MentorDashboard from "./components/mentor/MentorDashboard";
 import CollegeLogin from "./components/college/CollegeLogin";
 import CollegeRegister from "./components/college/CollegeRegister";
 import CollegeDashboard from "./components/college/CollegeDashboard";
+import StudentDashboard from "./components/StudentDashboard";
 
 const App = () => {
   return (
@@ -16,6 +17,7 @@ const App = () => {
         {/* Student routes */}
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/dashboard" element={<StudentDashboard />} />
         
         {/* Mentor routes */}
         <Route path="/mentor/register" element={<MentorRegister />} />
