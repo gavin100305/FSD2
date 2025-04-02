@@ -5,6 +5,9 @@ import Login from "./components/Login";
 import MentorLogin from "./components/mentor/MentorLogin";
 import MentorRegister from "./components/mentor/MentorRegister";
 import MentorDashboard from "./components/mentor/MentorDashboard";
+import CollegeLogin from "./components/college/CollegeLogin";
+import CollegeRegister from "./components/college/CollegeRegister";
+import CollegeDashboard from "./components/college/CollegeDashboard";
 
 const App = () => {
   return (
@@ -18,6 +21,11 @@ const App = () => {
         <Route path="/mentor/register" element={<MentorRegister />} />
         <Route path="/mentor/login" element={<MentorLogin />} />
         <Route path="/mentor/dashboard" element={<MentorDashboard />} />
+
+        {/* College routes */}
+        <Route path="/college/register" element={<CollegeRegister />} />
+        <Route path="/college/login" element={<CollegeLogin />} />
+        <Route path="/college/dashboard" element={<CollegeDashboard />} />
       </Routes>
     </Router>
   );

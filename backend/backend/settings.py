@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "social_django",  
     "students",  
     "mentor",
+    "college",
 ]
 
 MIDDLEWARE = [
@@ -61,7 +62,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-AUTH_USER_MODEL = "mentor.Mentor"
+AUTH_USER_MODEL = 'college.College'
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -72,9 +73,12 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
 }
 
-CORS_ALLOW_ALL_ORIGINS = True 
+CORS_ALLOW_ALL_ORIGINS = True
 
 # SOCIAL_AUTH_GITHUB_KEY = env("GITHUB_CLIENT_ID")
 # SOCIAL_AUTH_GITHUB_SECRET = env("GITHUB_CLIENT_SECRET")

@@ -115,3 +115,44 @@ export const getMentorProfile = async (token) => {
     return error.response?.data || { status: "error", message: "Unauthorized" };
   }
 };
+
+// College APIs
+export const registerCollege = async (collegeData) => {
+  try {
+    const response = await api.post("/colleges/register/", collegeData);
+    return response.data;
+  } catch (error) {
+    return error.response?.data || { status: "error", message: "Something went wrong" };
+  }
+};
+
+export const loginCollege = async (credentials) => {
+  try {
+    const response = await api.post("/colleges/login/", credentials);
+    return response.data;
+  } catch (error) {
+    return error.response?.data || { status: "error", message: "Invalid credentials" };
+  }
+};
+
+export const logoutCollege = async (token) => {
+  try {
+    const response = await api.post("/colleges/logout/", null, {
+      headers: { Authorization: `Token ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    return error.response?.data || { status: "error", message: "Logout failed" };
+  }
+};
+
+export const getCollegeProfile = async (token) => {
+  try {
+    const response = await api.get("/colleges/profile/", {
+      headers: { Authorization: `Token ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    return error.response?.data || { status: "error", message: "Unauthorized" };
+  }
+};
